@@ -1,10 +1,13 @@
 import { useState } from "react";
+import Client from "./Client";
+import Editor from "./Editor";
 
 const EditorPage = () => {
 
   const [clients,setClients] = useState([
     {socketId: 1 , username: "Measum"},
-    {socketId: 1 , username: "Measum"},
+    {socketId: 2 , username: "Ahmad"},
+   
   ])
 
   return (
@@ -32,10 +35,10 @@ const EditorPage = () => {
 
           {/* Clients list (Scrollable if needed) */}
           <div className="flex-grow-1 overflow-auto">
-              clients.map((client)=>{
-                {/*have'nt compelted this function 
-                will make client component first */}
-              })
+          {clients.map((client) => (
+  <Client key={client.socketId} username={client.username} />
+))}
+
             
           </div>
 
@@ -53,7 +56,7 @@ const EditorPage = () => {
 
         {/* Main Editor Area */}
         <div className="col-md-10 text-light d-flex align-items-center justify-content-center h-100">
-          <h2>Editor</h2>
+          <Editor/>
         </div>
       </div>
     </div>
