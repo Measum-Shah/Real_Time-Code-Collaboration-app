@@ -7,7 +7,6 @@ const EditorPage = () => {
   const [clients,setClients] = useState([
     {socketId: 1 , username: "Measum"},
     {socketId: 2 , username: "Ahmad"},
-   
   ])
 
   return (
