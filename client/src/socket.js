@@ -1,11 +1,12 @@
-import {io} from 'socket.io-client'
+import { io } from 'socket.io-client';
 
-export const initSocket = async()=>{
-  const option = {
-    'force new connection': true,
-    transports:['websockets'],
-    reconnectionAttempt: 'infinity',
+export const initSocket = async () => {
+  const options = {
+    forceNew: true,
+    transports: ['websocket'],
+    reconnectionAttempts: Infinity,
     timeout: 10000,
-  }
-  return io(process.env.REACT_APP_BACKEND_URL, option)
-}   
+  };
+
+  return io("http://localhost:8000", options);
+};

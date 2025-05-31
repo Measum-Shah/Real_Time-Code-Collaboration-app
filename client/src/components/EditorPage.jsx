@@ -1,8 +1,50 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Client from "./Client";
 import Editor from "./Editor";
+import { initSocket } from './../socket.js';
+import { useLocation, useNavigate, useParams,Navigate} from 'react-router-dom'
+import { toast } from 'react-hot-toast';
+
+
 
 const EditorPage = () => {
+  const socketRef = useRef(null);
+  const params = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const roomId = params.roomId;
+  const username = location.state?.username;
+
+  // iniializing socket.io
+  useEffect(()=>{
+    const init =async()=>{
+      socketRef.current = await initSocket(); 
+      socketRef.current.on('connect_error',(err)=>{
+        handleError(err);
+      }) 
+      socketRef.current.on('connect_failed',(err)=>{
+        handleError(err);
+      })
+
+      const handleError = (e)=>{
+        console.log( `socket rror : ${e}`)
+        toast.error(`socket connection failed`)
+        navigate('/')
+      }
+
+      socketRef.current.emit('join',{
+       roomId,
+       username
+      })
+      // console.log(`Room id is ${roomId} of ${username}`)
+    }
+    init();
+  },[])
+
+  if(!location.state){
+    return <Navigate to="/" />
+  }
 
   const [clients,setClients] = useState([
     {socketId: 1 , username: "Measum"},
