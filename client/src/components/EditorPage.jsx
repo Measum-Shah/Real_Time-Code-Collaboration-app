@@ -36,12 +36,18 @@ const EditorPage = () => {
   
       socketRef.current.emit("join", { roomId, username });
 
-      socketRef.current.on('joined',({clients,username,socketId})=>{
+      socketRef.current.on('joined',({clients,username})=>{
         if(username != location.state.username){
           toast.success(`${username} joined`)
         }
         setClients(clients)
        })
+
+       socketRef.current.on("disconnected", ({ username, socketId }) => {
+        toast.success(`${username} left`);
+        setClients((prev) => prev.filter(client => client.socketId !== socketId));
+      });
+      
     };
     init();
   
@@ -52,6 +58,8 @@ const EditorPage = () => {
         socketRef.current.disconnect(); // ✅ disconnect socket on unmount
       }
     };
+
+    
   }, []);
 
   

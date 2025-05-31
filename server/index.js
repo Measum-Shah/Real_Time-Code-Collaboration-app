@@ -20,6 +20,19 @@ const getAllConnectedClients = (roomId) => {
   });
 };
 
+socket.on('disconnecting', () => {
+  const rooms = [...socket.rooms];
+
+  rooms.forEach((roomId) => {
+    socket.in(roomId).emit("disconnected", {
+      socketId: socket.id,
+      username: userSocketMap[socket.id]
+    });
+  });
+  delete userSocketMap[socket.id]
+  socket.leave();
+});
+
 
   socket.on('join',({roomId,username})=>{
     userSocketMap[socket.id] = username;
@@ -36,7 +49,12 @@ const getAllConnectedClients = (roomId) => {
       })
     })
   })
+
+
+
 })
+
+
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT,()=>{
