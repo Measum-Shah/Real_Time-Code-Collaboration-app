@@ -12,44 +12,54 @@ const EditorPage = () => {
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [clients,setClients] = useState([])
   const roomId = params.roomId;
   const username = location.state?.username;
 
   // iniializing socket.io
-  useEffect(()=>{
-    const init =async()=>{
-      socketRef.current = await initSocket(); 
-      socketRef.current.on('connect_error',(err)=>{
-        handleError(err);
-      }) 
-      socketRef.current.on('connect_failed',(err)=>{
-        handleError(err);
-      })
+  useEffect(() => {
+    let isMounted = true;
+  
+    const init = async () => {
+      if (!isMounted) return;
+  
+      socketRef.current = await initSocket();
+  
+      const handleError = (e) => {
+        console.log(`socket error: ${e}`);
+        toast.error("Socket connection failed");
+        navigate("/");
+      };
+  
+      socketRef.current.on("connect_error", handleError);
+      socketRef.current.on("connect_failed", handleError);
+  
+      socketRef.current.emit("join", { roomId, username });
 
-      const handleError = (e)=>{
-        console.log( `socket rror : ${e}`)
-        toast.error(`socket connection failed`)
-        navigate('/')
-      }
-
-      socketRef.current.emit('join',{
-       roomId,
-       username
-      })
-      // console.log(`Room id is ${roomId} of ${username}`)
-    }
+      socketRef.current.on('joined',({clients,username,socketId})=>{
+        if(username != location.state.username){
+          toast.success(`${username} joined`)
+        }
+        setClients(clients)
+       })
+    };
     init();
-  },[])
+  
+    return () => {
+      isMounted = false;
+  
+      if (socketRef.current) {
+        socketRef.current.disconnect(); // ✅ disconnect socket on unmount
+      }
+    };
+  }, []);
 
+  
+  
   if(!location.state){
     return <Navigate to="/" />
   }
 
-  const [clients,setClients] = useState([
-    {socketId: 1 , username: "Measum"},
-    {socketId: 2 , username: "Ahmad"},
-  ])
 
   return (
     <div className="container-fluid vh-100">
