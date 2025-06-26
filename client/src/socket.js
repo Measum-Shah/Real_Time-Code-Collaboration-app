@@ -8,5 +8,5 @@ export const initSocket = async () => {
     timeout: 10000,
   };
 
-  return io("http://localhost:8000", options);
+  return io("", options);
 };
