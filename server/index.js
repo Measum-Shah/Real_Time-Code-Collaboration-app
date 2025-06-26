@@ -4,7 +4,7 @@ import cors from "cors";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 
-// Load env variables from .env file (only used in local dev)
+// Load environment variables from .env
 dotenv.config();
 
 const app = express();
@@ -16,6 +16,11 @@ app.use(cors({
   credentials: true
 }));
 
+// Optional: default route to test if backend is working
+app.get("/", (req, res) => {
+  res.send("✅ Socket.io backend is running!");
+});
+
 const server = http.createServer(app);
 
 // Setup socket.io with CORS for specific origin
@@ -26,12 +31,11 @@ const io = new Server(server, {
   }
 });
 
-// Map to store connected users
+// In-memory user storage
 const userSocketMap = {};
 
-// Handle socket connection
 io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`🔌 User connected: ${socket.id}`);
 
   const getAllConnectedClients = (roomId) => {
     return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map((socketId) => ({
@@ -41,30 +45,25 @@ io.on("connection", (socket) => {
   };
 
   socket.on("join", ({ roomId, username }) => {
-    console.log(`Join event: ${username} (socket ${socket.id}) joined room ${roomId}`);
+    console.log(`➡️  ${username} joined room ${roomId}`);
     userSocketMap[socket.id] = username;
     socket.join(roomId);
 
     const clients = getAllConnectedClients(roomId);
-    console.log(`Clients in room ${roomId}:`, clients);
-
     clients.forEach(({ socketId }) => {
       io.to(socketId).emit("joined", {
         clients,
         username,
         socketId: socket.id,
       });
-      console.log(`Emitted joined event to ${socketId}`);
     });
   });
 
   socket.on("code-change", ({ roomId, code }) => {
-    console.log(`Code-change event in room ${roomId}`);
     socket.to(roomId).emit("code-change", { code });
   });
 
   socket.on("sync-code", ({ code, socketId }) => {
-    console.log(`Sync-code event to ${socketId}`);
     io.to(socketId).emit("code-change", { code });
   });
 
@@ -80,11 +79,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
+    console.log(`❌ User disconnected: ${socket.id}`);
   });
 });
 
-// Choose port from env or fallback to 8000
+// Use Railway’s injected port or fallback to 8000
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
