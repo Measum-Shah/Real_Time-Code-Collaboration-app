@@ -8,5 +8,6 @@ export const initSocket = async () => {
     timeout: 10000,
   };
 
-  return io("", options);
+  return io("http://localhost:4000/", options);
+  // https://realtime-code-collaboration-app-production.up.railway.app/
 };
