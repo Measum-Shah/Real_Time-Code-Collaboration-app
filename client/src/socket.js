@@ -10,4 +10,5 @@ export const initSocket = async () => {
 
   return io("http://localhost:4000/", options);
   // https://realtime-code-collaboration-app-production.up.railway.app/
+  // http://localhost:4000/"
 };
